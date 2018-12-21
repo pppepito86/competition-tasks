@@ -17,5 +17,5 @@ public class Proleten extends Competition {
 		
 		return prefix + year;
 	}
-
+	
 }

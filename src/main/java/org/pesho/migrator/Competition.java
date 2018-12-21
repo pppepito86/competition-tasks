@@ -49,7 +49,7 @@ public abstract class Competition {
 	    }
 	}
 	
-	public void download(String url, File file) throws Exception {
+	public static void download(String url, File file) throws Exception {
 		System.out.println("Downloading " + url);
 		file.getParentFile().mkdirs();
 		
@@ -62,11 +62,11 @@ public abstract class Competition {
 		    	entity.writeTo(outstream);
 		    }
 		    
-		    if (!isValidZip(file)) throw new IllegalStateException("not valid zip file downloaded");
+		    if (file.getName().endsWith("zip") && !isValidZip(file)) throw new IllegalStateException("not valid zip file downloaded");
 		}
 	}
 	
-	public boolean isValidZip(File file) throws Exception {
+	public static boolean isValidZip(File file) throws Exception {
 		RandomAccessFile raf = new RandomAccessFile(file, "r");
 		long n = raf.readInt();
 		raf.close();

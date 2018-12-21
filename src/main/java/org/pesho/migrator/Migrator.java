@@ -7,12 +7,12 @@ public class Migrator {
 	public static final String DIR = "C:\\Users\\Petar\\Documents\\vagrant_sti\\competition-tasks\\tasks\\";
 
 	public static void main(String[] args) throws Exception {
-//		downloadEsenen();
 		
-		for (int year = 2018; year <= 2018; year++) {
+		for (int year = Proleten.FIRST_YEAR; year <= Proleten.LAST_YEAR; year++) {
 			for (char group = 'A'; group <= 'E'; group++) {
-				Problem.migrate(new File(String.format(DIR + "raw\\zip\\esenen_%d_%c.zip", year, group)), 
-						new File(String.format(DIR + "esenen\\%d\\%c", year, group)));
+//				Problem.migrate(new File(String.format(DIR + "raw\\zip\\leten_%d_%c.zip", year, group)), 
+//						new File(String.format(DIR + "leten\\%d\\%c", year, group)));
+				Problem.addTaskDescription(new Proleten(year, group+""), new File(String.format(DIR + "proleten\\%d\\%c", year, group)));
 			}
 		}
 		
@@ -32,7 +32,7 @@ public class Migrator {
 	public static void downloadZimen() throws Exception {
 		for (int year = Zimen.FIRST_YEAR; year <= Zimen.LAST_YEAR; year++) {
 			for (char group = 'A'; group <= 'E'; group++) {
-				File file = new File(String.format(DIR + "\\zimen_%d_%c.zip", year, group));
+				File file = new File(String.format(DIR + "raw\\\\zip\\\\zimen_%d_%c.zip", year, group));
 				new Zimen(year, ""+group).download(file);
 			}
 		}
@@ -41,7 +41,7 @@ public class Migrator {
 	public static void downloadProleten() throws Exception {
 		for (int year = Proleten.FIRST_YEAR; year <= Proleten.LAST_YEAR; year++) {
 			for (char group = 'A'; group <= 'E'; group++) {
-				File file = new File(String.format("D:\\Documents\\infos\\proleten_%d_%c.zip", year, group));
+				File file = new File(String.format(DIR + "raw\\\\zip\\\\proleten_%d_%c.zip", year, group));
 				new Proleten(year, ""+group).download(file);
 			}
 		}
@@ -51,7 +51,7 @@ public class Migrator {
 	public static void downloadLeten() throws Exception {
 		for (int year = Leten.FIRST_YEAR; year <= Leten.LAST_YEAR; year++) {
 			for (char group = 'A'; group <= 'E'; group++) {
-				File file = new File(String.format("D:\\Documents\\infos\\leten_%d_%c.zip", year, group));
+				File file = new File(String.format(DIR + "raw\\\\zip\\\\leten_%d_%c.zip", year, group));
 				new Leten(year, ""+group).download(file);
 			}
 		}

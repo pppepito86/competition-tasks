@@ -17,7 +17,7 @@ public class Esenen extends Competition {
 	@Override
 	public boolean isCorrectZip(String zip) {
 		if (year == 2007) {
-			if (!zip.contains("author")) return false;
+			if (!zip.contains("tests")) return false;
 			zip = zip.split("\\.")[0];
 			return zip.charAt(zip.length()-1) == group.charAt(0)-'A'+'a';
 		} else if (year <= 2016) {

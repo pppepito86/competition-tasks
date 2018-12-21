@@ -7,6 +7,11 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.pesho.grader.task.TaskParser;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -82,5 +87,52 @@ public class Problem {
         }
 
 	}
+
+	public static void addTaskDescription(Competition competition, File file) throws Exception {
+		HttpGet get = new HttpGet(competition.getUrl());
+	    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+	    	CloseableHttpResponse response = httpClient.execute(get);
+	    	if (response.getStatusLine().getStatusCode() != 200) throw new IllegalStateException("response not ok");
+	    	
+	    	String s = EntityUtils.toString(response.getEntity());
+	    	List<String> pdfs = Arrays.stream(s.split("\"")).filter(x -> x.endsWith("pdf")).collect(Collectors.toList());
+	    	
+	    	for (File f: file.listFiles()) {
+	    		File pdf = new File(f, f.getName().split("-")[1]+".pdf");
+	    		String part = competition.group + f.getName().split("-")[0];
+	    		
+	    		List<String> filtered = pdfs.stream().filter(x -> x.contains(part)).collect(Collectors.toList());
+	    		if (filtered.isEmpty()) {
+	    			filtered = pdfs.stream().filter(x -> x.contains(part.toLowerCase())).collect(Collectors.toList());
+	    			if (filtered.isEmpty()) filtered = pdfs;
+	    		}
+	    		
+	    		filtered = filtered.stream()
+	    				.filter(x -> !x.contains("-en"))
+	    				.filter(x -> !x.contains("-EN"))
+	    				.filter(x -> !x.contains("-sol"))
+	    				.filter(x -> !x.contains("-SOL"))
+	    				.collect(Collectors.toList());
+	    		
+	    		String url = "";
+	    		if (filtered.size() == 1) {
+	    			url = filtered.get(0);
+	    		} else {
+	    			System.out.println("Select for " + f.getAbsolutePath() + ":");
+	    			for (int i = 0; i < filtered.size(); i++) {
+	    				System.out.println("  " + (i+1) + " :" + filtered.get(i));
+	    			}
+	    			Scanner in = new Scanner(System.in);
+	    			int n = in.nextInt()-1;
+	    			url = filtered.get(n);
+	    		}
+	    		Competition.download(Competition.INFOS_PREFIX + url, pdf);
+	    		System.out.println(String.format("Downloading %s to %s", url, pdf.getAbsolutePath()));
+	    	}
+
+	    }
+	}
+	
+	
 	
 }
