@@ -22,7 +22,7 @@ public abstract class Competition {
 		this.year = year;
 		this.group = group;
 	}
-	
+
 	public boolean download(File file) throws Exception {
 		HttpGet get = new HttpGet(getUrl());
 	    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
