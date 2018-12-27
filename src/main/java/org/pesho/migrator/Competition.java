@@ -3,6 +3,7 @@ package org.pesho.migrator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -29,7 +30,7 @@ public abstract class Competition {
 	    	CloseableHttpResponse response = httpClient.execute(get);
 	    	if (response.getStatusLine().getStatusCode() != 200) return false;
 	    	
-	    	String s = EntityUtils.toString(response.getEntity());
+	    	String s = EntityUtils.toString(response.getEntity(), Charset.forName("Windows-1251"));
 	    	
 	    	String[] split = s.split("\"");
 
@@ -78,7 +79,7 @@ public abstract class Competition {
 	}
 
 	public boolean isCorrectZip(String zip) {
-		return zip.contains("author") && zip.contains(group);
+		return (zip.toLowerCase().contains("author")||zip.toLowerCase().contains("autor")) && zip.contains(group);
 	}
 	
 	public abstract String specificUrl();

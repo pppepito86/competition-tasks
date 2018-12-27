@@ -1,6 +1,8 @@
 package org.pesho.migrator;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -40,29 +42,23 @@ public class Problem {
         }
         
 		List<File> tasks = Arrays.stream(tasksDir.listFiles()).filter(f -> f.isDirectory()).filter(f -> !f.getName().startsWith(".")).collect(Collectors.toList());
-		if (tasks.size() > 3) {tasks = tasks.stream().filter(t -> !t.getName().toUpperCase().contains("AUTHOR")).collect(Collectors.toList());
+		tasks = tasks.stream().filter(t -> !t.getName().toUpperCase().contains("AUTHOR")).collect(Collectors.toList());
+		if (tasks.size() > 3) {
 			System.out.println("***");
 		}
-		boolean dash = tasks.stream().allMatch(t -> t.getName().contains("-"));
-		boolean dot = tasks.stream().allMatch(t -> t.getName().contains("."));
+		String delim = "";
+		if (tasks.stream().allMatch(t -> t.getName().contains("-"))) delim = "-";
+		if (tasks.stream().allMatch(t -> t.getName().contains("."))) delim = "\\.";
+		if (tasks.stream().allMatch(t -> t.getName().contains("_"))) delim = "_";
+		if (tasks.stream().allMatch(t -> t.getName().contains(" "))) delim = " ";
 		for (File f: tasks) {
 			System.out.println(f.getAbsolutePath());
 			TaskParser parser = new TaskParser(f);
 			
 			String name = f.getName().trim();
 			int number = 0;
-			if (dash) {
-				String[] split = name.split("-");
-				for(char c: split[0].toCharArray()) {
-					if (Character.isDigit(c)) {
-						number = c-'0';
-						break;
-					}
-				}
-				name = split[1].trim();
-			}
-			else if (dot) {
-				String[] split = name.split("\\.");
+			if (!delim.isEmpty()) {
+				String[] split = name.split(delim+"");
 				for(char c: split[0].toCharArray()) {
 					if (Character.isDigit(c)) {
 						number = c-'0';
@@ -94,8 +90,38 @@ public class Problem {
 	    	CloseableHttpResponse response = httpClient.execute(get);
 	    	if (response.getStatusLine().getStatusCode() != 200) throw new IllegalStateException("response not ok");
 	    	
-	    	String s = EntityUtils.toString(response.getEntity());
+	    	String s = EntityUtils.toString(response.getEntity(), Charset.forName("Windows-1251"));
 	    	List<String> pdfs = Arrays.stream(s.split("\"")).filter(x -> x.endsWith("pdf")).collect(Collectors.toList());
+	    	
+	    	if (file.getAbsolutePath().contains("noi3")) {
+	    		pdfs = new ArrayList<>();
+	    		String[] split = s.split("\"");
+	    		for (int i = 0; i < split.length; i++) {
+	    			if (split[i].toLowerCase().contains("областен кръг")) break;
+	    			pdfs.add(split[i]);
+	    		}
+	    	}
+	    	if (file.getAbsolutePath().contains("noi2")) {
+	    		pdfs = new ArrayList<>();
+	    		String[] split = s.split("\"");
+	    		boolean started = false;
+	    		for (int i = 0; i < split.length; i++) {
+	    			if (split[i].toLowerCase().contains("областен кръг")) started=true;
+	    			if (split[i].toLowerCase().contains("общински кръг")) started=false;
+	    			if (started) pdfs.add(split[i]);
+	    		}
+	    	}
+	    	if (file.getAbsolutePath().contains("noi1")) {
+	    		pdfs = new ArrayList<>();
+	    		String[] split = s.split("\"");
+	    		boolean started = false;
+	    		for (int i = 0; i < split.length; i++) {
+	    			if (split[i].toLowerCase().contains("общински кръг")) started=true;
+	    			if (started) pdfs.add(split[i]);
+	    		}
+	    	}
+	    	pdfs = pdfs.stream().filter(x -> x.endsWith("pdf")).collect(Collectors.toList());
+	    	
 	    	
 	    	for (File f: file.listFiles()) {
 	    		File pdf = new File(f, f.getName().split("-")[1]+".pdf");
@@ -109,9 +135,13 @@ public class Problem {
 	    		
 	    		filtered = filtered.stream()
 	    				.filter(x -> !x.contains("-en"))
+	    				.filter(x -> !x.contains("_en"))
 	    				.filter(x -> !x.contains("-EN"))
+	    				.filter(x -> !x.contains("_EN"))
 	    				.filter(x -> !x.contains("-sol"))
 	    				.filter(x -> !x.contains("-SOL"))
+	    				.filter(x -> !x.contains("_prot"))
+	    				.filter(x -> !x.contains("-prot"))
 	    				.collect(Collectors.toList());
 	    		
 	    		String url = "";
